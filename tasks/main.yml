@@ -1,16 +1,24 @@
 ---
-    - name: Vector/Install package
+    - name: Vector | install Vector distrib | CentOS
       become: true
       ansible.builtin.yum:
         name: "{{ vector_url }}"
         state: present
+      when: ansible_distribution == "CentOS"
+      tags: Vector
+      
+    - name: Vector | install Vector distrib | Ubuntu
+      become: true
+      ansible.builtin.apt:
+        deb: "{{ vector_deb }}"
+      when: ansible_distribution == "Ubuntu"
       tags: Vector
 
     - name: Vector/Template config
       become: true
       ansible.builtin.template:
         src: vector.yml.j2
-        dest: vector.yml
+        dest: /etc/vector/vector.yaml
         mode: "644"
         owner: "{{ ansible_user_id }}"
         group: "{{ ansible_user_gid }}"
@@ -33,4 +41,6 @@
         name: vector
         state: started
         daemon_reload: true
+      when: ansible_virtualization_type != "docker"
       tags: Vector
+
